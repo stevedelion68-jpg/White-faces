@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>WHITE FACE'S — Refonte</title>
+<style>
+:root{--bg:#0b1220;--panel:#151f31;--panel2:#1c2a40;--line:#34445e;--text:#edf3ff;--muted:#9eafc8;--ice:#7dd3fc;--gold:#f6c96b;--red:#fb7185;--green:#86efac}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172943,#090f1b 65%);color:var(--text);font:15px system-ui,Segoe UI,sans-serif}
+header{padding:16px 14px 10px;position:sticky;top:0;background:#0c1524ee;backdrop-filter:blur(10px);z-index:5;border-bottom:1px solid var(--line)}
+h1{font-size:22px;letter-spacing:2px;margin:0;color:var(--ice)}header small{color:var(--muted)}
+main{max-width:1050px;margin:auto;padding:12px;display:grid;gap:12px}
+nav{display:flex;gap:7px;overflow:auto;padding:2px 0 7px}
+button,.tab{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:9px 12px;border-radius:10px;font-weight:650;cursor:pointer}
+button:disabled{opacity:.35;cursor:not-allowed}.tab.active{background:#16405b;border-color:var(--ice);color:#dff6ff}
+.panel{background:linear-gradient(160deg,#172338,#111a2a);border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:0 8px 28px #0003}
+h2{font-size:17px;margin:0 0 10px}h3{font-size:14px;margin:10px 0 6px;color:var(--ice)}
+.muted{color:var(--muted);font-size:13px}.gold{color:var(--gold)}.good{color:var(--green)}.bad{color:var(--red)}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.grow{flex:1;min-width:150px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stat{background:#0c1626;border:1px solid #2c3b53;border-radius:9px;padding:7px;text-align:center}.stat b{display:block;font-size:16px}.stat small{font-size:10px;color:var(--muted)}
+.bar{height:8px;background:#34445a;border-radius:10px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--green)}.bar.hp i{background:var(--red)}.bar.xp i{background:var(--gold)}
+.card{border:1px solid var(--line);background:#0d1829;border-radius:11px;padding:10px;margin:7px 0}
+.item{display:flex;align-items:center;gap:9px}.item .emoji{font-size:25px;width:32px;text-align:center}
+details{border:1px solid #31415a;border-radius:10px;padding:8px;margin:7px 0;background:#0e192a}summary{cursor:pointer;font-weight:700}
+.map{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;max-width:600px;margin:10px auto}
+.tile{aspect-ratio:1;border-radius:5px;border:1px solid #43536b;background:#24364a;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3vw,21px);padding:0;position:relative;min-width:0}
+.tile.forest{background:#1c493b}.tile.rock{background:#41495b}.tile.ice{background:#31566d}.tile.water{background:#163e63}.tile.move{outline:2px solid var(--green);background:#25523f}.tile.attack{outline:2px solid var(--red)}.tile.selected{border:2px solid var(--gold)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.log{max-height:180px;overflow:auto;font-size:13px;line-height:1.55}.log div{border-bottom:1px solid #26354a;padding:3px 0}
+.actionrow{display:flex;gap:7px;flex-wrap:wrap}.actionrow button{flex:1}
+.hidden{display:none}.notice{padding:9px;border-left:3px solid var(--ice);background:#10263a;border-radius:7px;color:#d9efff;font-size:13px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:8px}
+@media(min-width:760px){main{grid-template-columns:1.1fr .9fr}.wide{grid-column:1/-1}}
+</style></head><body>
+<header><h1>WHITE FACE'S</h1><small>Refonte tactique V5+ • Chapitres I & II • 2 recrues à découvrir</small></header>
+<main>
+<section class="panel wide">
+ <div class="row between"><div><h2 id="sceneTitle">Le sanctuaire enneigé</h2><div class="muted" id="sceneText">Devant la porte gravée de trois symboles, le pendentif de flocon brille doucement.</div></div><div class="gold" id="gold">55 PO</div></div>
+ <div class="row" style="margin-top:10px"><button onclick="saveGame()">💾 Sauvegarder</button><button onclick="restAll()">⛺ Repos d'équipe</button><button onclick="resetGame()">↺ Nouvelle partie</button></div>
+ <div id="storyChoices" class="actionrow" style="margin-top:9px"></div>
+</section>
+<nav class="wide">
+ <button class="tab active" data-tab="map">🗺️ Carte</button><button class="tab" data-tab="team">👥 Équipe</button><button class="tab" data-tab="bag">🎒 Sac</button><button class="tab" data-tab="shop">🏪 Boutique</button><button class="tab" data-tab="bestiary">📖 Monstres</button>
+</nav>
+<section class="panel" id="mapPanel">
+ <div class="row between"><h2>Carte tactique 10 × 10</h2><span class="muted" id="turnLabel">Exploration</span></div>
+ <div class="legend"><span>🧙 Filacii</span><span>⚔️ Elya</span><span>🐺 Monstre</span><span>🌲 Forêt</span><span>🪨 Rocher</span><span>🧊 Glace</span></div>
+ <div class="map" id="map"></div>
+ <div class="muted" id="mapHelp">Sélectionne un allié puis une case verte pour te déplacer. En combat, approche-toi d'un ennemi pour attaquer.</div>
+ <div class="card"><b>Unité sélectionnée</b><div id="selectedInfo" class="muted">Filacii</div><div class="actionrow" style="margin-top:8px"><button onclick="attackSelected()">⚔️ Attaquer</button><button onclick="endTurn()">Fin du tour</button><button onclick="useHealSelected()">💚 Se soigner</button></div></div>
+</section>
+<section class="panel" id="sidePanel">
+ <h2>Journal d'aventure</h2><div class="log" id="log"></div>
+ <h3>Objectif</h3><div id="objective" class="notice">Examine les trois symboles du sanctuaire.</div>
+ <h3>Combat</h3><div id="battleInfo" class="muted">Aucun ennemi en vue.</div>
+</section>
+<section class="panel hidden" id="teamPanel">
+ <h2>Équipe</h2><div id="team"></div>
+</section>
+<section class="panel hidden" id="bagPanel">
+ <h2>Sac et équipements</h2><div id="bag"></div>
+</section>
+<section class="panel hidden" id="shopPanel">
+ <h2>Échoppe itinérante</h2><p class="muted">Le marchand apparaît près des lieux sûrs. Les stocks se renouvellent à chaque étape importante.</p><div id="shop"></div>
+</section>
+<section class="panel hidden" id="bestiaryPanel">
+ <h2>Bestiaire</h2><p class="muted">Les fiches des créatures rencontrées sont consultables ici.</p><div id="bestiary"></div>
+</section>
+<section class="panel wide">
+ <div class="row between"><span class="muted">Sauvegarde locale automatique après les actions importantes</span><span class="muted" id="saveStatus">Non sauvegardé</span></div>
+</section>
+</main><footer>WHITE FACE'S • Chapitres I & II — Prototype jouable local • Sauvegarde dans ce navigateur</footer>
+<script>
+const base={
+ party:[
+ {id:'fil',name:'Filacii',class:'Mage',level:2,xp:35,hp:20,maxHp:24,stats:{FOR:3,MAG:13,TEC:9,VIT:8,DEF:4,RES:10,CH:6,MVT:5},growth:{FOR:20,MAG:65,TEC:45,VIT:40,DEF:25,RES:50,CH:30},pos:[1,8],weapon:'Tome novice',armor:'Manteau de voyage',accessory:'Pendentif flocon',skills:['Éclat de glace','Soin mineur']},
+ {id:'elya',name:'Elya',class:'Bretteuse',level:3,xp:40,hp:23,maxHp:32,stats:{FOR:11,MAG:2,TEC:12,VIT:13,DEF:7,RES:5,CH:8,MVT:6},growth:{FOR:55,MAG:15,TEC:60,VIT:65,DEF:35,RES:25,CH:40},pos:[2,8],weapon:'Épée de fer',armor:'Veste renforcée',accessory:'Anneau de givre',skills:['Frappe rapide','Garde'] }
+ ],
+ gold:55,items:{'Potion de soin':3,'Herbe médicinale':2,'Éther mineur':1,'Dent gelée':1,'Rune de givre':1},
+ stage:0,turn:1,selected:'fil',combat:false,enemyTurn:false,seen:[],mapEnemies:[],log:['Le vent souffle autour du sanctuaire.','Le pendentif de flocon s’illumine.'],objective:'Examine les trois symboles du sanctuaire.',symbols:[],visitedShop:false,recruited:{archer:false,priest:false},clues:0
+};
+let S=load()||structuredClone(base), terrain={}, selectedTile=null, moved=false, attacked=false;S.clues=S.clues||0;
+const monsters={
+ wolf:{name:'Loup des neiges',emoji:'🐺',hp:22,maxHp:22,stats:{FOR:8,MAG:2,TEC:7,VIT:9,DEF:3,RES:2,CH:4,MVT:5},weak:'Feu',resist:'Glace',skills:['Morsure'],xp:18,gold:9,drop:'Dent gelée'},
+ sentry:{name:'Sentinelle de givre',emoji:'🛡️',hp:35,maxHp:35,stats:{FOR:10,MAG:5,TEC:6,VIT:3,DEF:9,RES:7,CH:2,MVT:3},weak:'Feu',resist:'Glace',skills:['Coup de bouclier'],xp:30,gold:15,drop:'Éclat d’armure'},
+ specter:{name:'Spectre runique',emoji:'👻',hp:27,maxHp:27,stats:{FOR:3,MAG:11,TEC:8,VIT:8,DEF:2,RES:10,CH:6,MVT:4},weak:'Physique',resist:'Magie',skills:['Trait spectral'],xp:28,gold:14,drop:'Rune de givre'},
+ spider:{name:'Araignée des pins',emoji:'🕷️',hp:31,maxHp:31,stats:{FOR:9,MAG:1,TEC:10,VIT:7,DEF:4,RES:3,CH:5,MVT:5},weak:'Feu',resist:'Poison',skills:['Fil entravant','Morsure'],xp:25,gold:12,drop:'Venin séché'},
+ boss:{name:'Veilleur de brume',emoji:'🌫️',hp:62,maxHp:62,stats:{FOR:13,MAG:12,TEC:10,VIT:7,DEF:8,RES:9,CH:7,MVT:4},weak:'Lumière',resist:'Glace',skills:['Brume vorace','Onde gelée'],xp:65,gold:35,drop:'Cœur de brume'},
+ bandit:{name:'Pilleur des cendres',emoji:'🗡️',hp:38,maxHp:38,stats:{FOR:12,MAG:2,TEC:10,VIT:10,DEF:5,RES:3,CH:6,MVT:5},weak:'Magie',resist:'Physique',skills:['Estoc sournois'],xp:34,gold:20,drop:'Insigne fendu'},
+ warden:{name:'Gardien des cloches',emoji:'🔔',hp:54,maxHp:54,stats:{FOR:11,MAG:13,TEC:9,VIT:5,DEF:7,RES:12,CH:5,MVT:3},weak:'Physique',resist:'Glace',skills:['Résonance funeste'],xp:48,gold:26,drop:'Éclat sonore'},
+ shadeboss:{name:'Le Porte-Voix',emoji:'👁️',hp:88,maxHp:88,stats:{FOR:14,MAG:16,TEC:12,VIT:8,DEF:9,RES:13,CH:9,MVT:4},weak:'Lumière',resist:'Glace',skills:['Écho dévorant','Marque du silence'],xp:100,gold:60,drop:'Fragment de mémoire'}
+};
+let enemies=[];
+const weapons=[
+ {name:'Tome novice',kind:'Arme',atk:0,mag:4,hit:92,crit:4,weight:1,range:'2-3',price:0,desc:'Un tome simple, adapté aux apprentis mages.'},
+ {name:'Épée de fer',kind:'Arme',atk:4,mag:0,hit:90,crit:5,weight:3,range:'1',price:0,desc:'Une lame fiable sans particularité.'},
+ {name:'Lame de givre',kind:'Arme',atk:7,mag:1,hit:88,crit:8,weight:4,range:'1',price:42,desc:'Inflige des dégâts de glace.'},
+ {name:'Tome boréal',kind:'Arme',atk:0,mag:8,hit:85,crit:7,weight:2,range:'2-3',price:48,desc:'Un tome imprégné de magie froide.'},{name:'Arc court',kind:'Arme',atk:5,mag:0,hit:88,crit:7,weight:2,range:'2-3',price:0,desc:'Un arc léger pour les tirs à distance.'},{name:'Bâton de novice',kind:'Arme',atk:0,mag:2,hit:95,crit:0,weight:1,range:'1-2',price:0,desc:'Un bâton de soin et de soutien.'}
+];
+const armors=[
+ {name:'Manteau de voyage',def:1,res:1,weight:1,price:0,desc:'Protection légère.'},
+ {name:'Veste renforcée',def:2,res:0,weight:2,price:0,desc:'Une veste renforcée pour le corps-à-corps.'},
+ {name:'Cotte de mailles',def:4,res:1,weight:4,price:38,desc:'Réduit les dégâts physiques.'},
+ {name:'Cape runique',def:1,res:4,weight:2,price:40,desc:'Protège contre les attaques magiques.'}
+];
+const accessories=[
+ {name:'Pendentif flocon',bonus:'RES +1',price:0,desc:'Le pendentif réagit aux runes anciennes.'},
+ {name:'Anneau de givre',bonus:'MAG +1',price:0,desc:'Un anneau froid au toucher.'},
+ {name:'Broche du veilleur',bonus:'DEF +1, RES +1',price:28,desc:'Un ancien talisman protecteur.'}
+];
+const shopItems=[{name:'Potion de soin',price:12,desc:'Rend 15 PV.'},{name:'Herbe médicinale',price:6,desc:'Rend 8 PV.'},{name:'Éther mineur',price:14,desc:'Rend 10 PM (réserve magique à venir).'},...weapons.filter(x=>x.price>0),...armors.filter(x=>x.price>0),...accessories.filter(x=>x.price>0)];
+const futureRecruits={
+ archer:{id:'lina',name:'Lina',class:'Archère',level:3,xp:0,hp:27,maxHp:27,stats:{FOR:9,MAG:2,TEC:13,VIT:11,DEF:5,RES:6,CH:8,MVT:6},growth:{FOR:45,MAG:15,TEC:65,VIT:55,DEF:30,RES:30,CH:45},pos:[0,7],weapon:'Arc court',armor:'Manteau de voyage',accessory:'Broche du veilleur',skills:['Tir précis','Tir à longue portée']},
+ priest:{id:'oren',name:'Oren',class:'Prêtre',level:4,xp:0,hp:29,maxHp:29,stats:{FOR:3,MAG:10,TEC:8,VIT:7,DEF:5,RES:12,CH:10,MVT:5},growth:{FOR:15,MAG:55,TEC:40,VIT:35,DEF:25,RES:65,CH:55},pos:[3,8],weapon:'Bâton de novice',armor:'Cape runique',accessory:'Pendentif flocon',skills:['Soin majeur','Bénédiction'] }
+};
+
+const $=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem('whitefaces_v5'))}catch(e){return null}}
+function saveGame(){localStorage.setItem('whitefaces_v5',JSON.stringify(S));$('saveStatus').textContent='Sauvegarde effectuée';}
+function log(t){S.log.unshift(t);S.log=S.log.slice(0,45);renderLog()}
+function renderLog(){$('log').innerHTML=S.log.map(x=>'<div>'+esc(x)+'</div>').join('')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function unit(){return S.party.find(p=>p.id===S.selected)||S.party[0]}
+function enemyAt(x,y){return enemies.find(e=>e.x===x&&e.y===y&&e.hp>0)}
+function allyAt(x,y){return S.party.find(p=>p.pos[0]===x&&p.pos[1]===y)}
+function terrainAt(x,y){return terrain[x+','+y]||''}
+function makeMap(){terrain={};[[4,2,'forest'],[5,2,'forest'],[4,3,'forest'],[7,4,'rock'],[7,5,'rock'],[2,5,'ice'],[3,5,'ice'],[8,7,'water'],[8,8,'water'],[5,7,'forest'],[6,7,'forest']].forEach(([x,y,t])=>terrain[x+','+y]=t)}
+makeMap();
+function beginBattle(type,positions){S.combat=true;S.turn=1;S.enemyTurn=false;moved=false;attacked=false;enemies=[{...structuredClone(monsters[type]),id:type,x:positions[0],y:positions[1]}];S.mapEnemies=enemies.map(e=>({id:e.id,x:e.x,y:e.y}));S.objective='Vaincre '+enemies[0].name+'.';log('⚔️ '+enemies[0].name+' apparaît !');render()}
+function renderMap(){
+ let out='';for(let y=0;y<10;y++)for(let x=0;x<10;x++){
+ let p=allyAt(x,y),e=enemyAt(x,y),t=terrainAt(x,y),cl=t;
+ let reachable=false;if(S.selected){let u=unit(),d=Math.abs(x-u.pos[0])+Math.abs(y-u.pos[1]);reachable=d>0&&d<=u.stats.MVT&&!p&&!e&&!['rock','water'].includes(t)&&!S.combat?true:false;if(S.combat&&d>0&&d<=u.stats.MVT&&!p&&!e&&!['rock','water'].includes(t)&&!moved)reachable=true}
+ if(reachable)cl+=' move';
+ let sym=p?(p.id==='fil'?'🧙':'⚔️'):e?e.emoji:t==='forest'?'🌲':t==='rock'?'🪨':t==='ice'?'🧊':t==='water'?'🌊':'';
+ let sel=(p&&p.id===S.selected)||(selectedTile&&selectedTile[0]===x&&selectedTile[1]===y);
+ out+=`<button class="tile ${cl} ${sel?'selected':''}" data-x="${x}" data-y="${y}" onclick="tileClick(${x},${y})">${sym}</button>`;
+ }$('map').innerHTML=out;
+ $('selectedInfo').textContent=unit().name+' • '+unit().class+' • '+unit().hp+'/'+unit().maxHp+' PV • MVT '+unit().stats.MVT;
+ $('turnLabel').textContent=S.combat?'Tour '+S.turn+(S.enemyTurn?' • Ennemis':' • Alliés'):'Exploration';
+ $('battleInfo').innerHTML=enemies.filter(e=>e.hp>0).map(e=>`${e.emoji} <b>${e.name}</b> — ${e.hp}/${e.maxHp} PV`).join('<br>')||'Aucun ennemi en vue.';
+}
+function tileClick(x,y){
+ let p=allyAt(x,y),e=enemyAt(x,y);
+ if(p){S.selected=p.id;selectedTile=[x,y];moved=false;attacked=false;render();return}
+ if(e){log(e.name+' : '+e.hp+'/'+e.maxHp+' PV.');return}
+ let u=unit(),d=Math.abs(x-u.pos[0])+Math.abs(y-u.pos[1]),t=terrainAt(x,y);
+ if(d<=u.stats.MVT&&!moved&&!['rock','water'].includes(t)&&(!S.combat||S.enemyTurn===false)){u.pos=[x,y];moved=true;log(u.name+' se déplace en ('+(x+1)+','+(y+1)+').');renderMap();saveGame()}
+}
+function damage(att,def,magic=false){let raw=(magic?att.stats.MAG:att.stats.FOR)+(magic?4:4)-(magic?def.stats.RES:def.stats.DEF);return Math.max(1,raw)}
+function attackSelected(){
+ if(!S.combat||S.enemyTurn||attacked){log('Aucune attaque disponible.');return}
+ let u=unit(),targets=enemies.filter(e=>e.hp>0&&Math.abs(e.x-u.pos[0])+Math.abs(e.y-u.pos[1])<=((u.id==='fil')?3:1));
+ if(!targets.length){log('Aucun ennemi à portée.');return}
+ let e=targets[0],mag=u.id==='fil',d=damage(u,e,mag),crit=Math.random()<.08;if(crit)d*=2;e.hp=Math.max(0,e.hp-d);attacked=true;log(`${u.name} utilise ${mag?'Éclat de glace':'Attaque'} sur ${e.name} : ${d} dégâts${crit?' (CRITIQUE !)':''}.`);
+ if(e.hp<=0){log(`${e.name} est vaincu ! +${e.xp} EXP, +${e.gold} PO, butin : ${e.drop}.`);S.gold+=e.gold;S.items[e.drop]=(S.items[e.drop]||0)+1;gainXp(u,e.xp);if(enemies.every(z=>z.hp<=0))victory()}
+ render();saveGame()
+}
+function gainXp(p,n){p.xp+=n;while(p.xp>=100){p.xp-=100;p.level++;p.maxHp+=2;p.hp=Math.min(p.maxHp,p.hp+2);for(let k in p.growth)if(Math.random()*100<p.growth[k])p.stats[k]++;log(`⬆️ ${p.name} passe niveau ${p.level} ! PV max +2. Croissances tirées individuellement.`)}}
+function enemyPhase(){S.enemyTurn=true;for(let e of enemies.filter(e=>e.hp>0)){let target=S.party.slice().sort((a,b)=>Math.abs(a.pos[0]-e.x)+Math.abs(a.pos[1]-e.y)-(Math.abs(b.pos[0]-e.x)+Math.abs(b.pos[1]-e.y)))[0];let dist=Math.abs(target.pos[0]-e.x)+Math.abs(target.pos[1]-e.y);if(dist<=1){let d=Math.max(1,e.stats.FOR-target.stats.DEF);target.hp=Math.max(0,target.hp-d);log(`${e.name} attaque ${target.name} : ${d} dégâts.`);if(target.hp===0)log(target.name+' est K.O. !')}else{let dx=Math.sign(target.pos[0]-e.x),dy=Math.sign(target.pos[1]-e.y);if(!allyAt(e.x+dx,e.y)&&!enemyAt(e.x+dx,e.y)){e.x+=dx;e.y+=dy;log(e.name+' avance.')}}}
+ S.enemyTurn=false;S.turn++;moved=false;attacked=false;if(S.party.every(p=>p.hp<=0)){S.objective='Équipe vaincue. Repose-toi ou recharge la sauvegarde.';log('Toute l’équipe est à terre.')}render();saveGame()}
+function endTurn(){if(!S.combat){log('Il n’y a pas de combat en cours.');return}if(!S.enemyTurn)enemyPhase()}
+function recruit(key){
+ if(S.recruited[key]) return;
+ let p=structuredClone(futureRecruits[key]);S.party.push(p);S.recruited[key]=true;
+ log('🤝 '+p.name+' rejoint l’équipe comme '+p.class+' !');
+}
+function victory(){S.combat=false;S.stage++;S.objective='Victoire ! Explore la zone et poursuis ton aventure.';log('La zone est sécurisée. Tu peux explorer, te soigner ou visiter la boutique.');
+ if(S.stage===4&&!S.recruited.archer){log('Une archère nommée Lina vous rejoint après avoir été secourue dans la forêt.');recruit('archer');}
+ if(S.stage===5&&!S.recruited.priest){log('Oren, un prêtre rencontré dans la clairière, décide de vous accompagner.');recruit('priest');}
+ enemies=[];S.visitedShop=false;startStage();saveGame()}
+function useItem(name,p=unit()){
+ let count=S.items[name]||0;if(!count){log('Tu ne possèdes plus cet objet.');return}
+ let heal=name==='Potion de soin'?15:name==='Herbe médicinale'?8:0;if(heal){if(p.hp>=p.maxHp){log(p.name+' n’a pas besoin de soin.');return}let before=p.hp;p.hp=Math.min(p.maxHp,p.hp+heal);S.items[name]--;log(p.name+' récupère '+(p.hp-before)+' PV grâce à '+name+'.');render();saveGame();return}
+ log('Cet objet ne peut pas être utilisé ici.')
+}
+function useHealSelected(){let u=unit();if(S.items['Potion de soin']>0)useItem('Potion de soin',u);else if(S.items['Herbe médicinale']>0)useItem('Herbe médicinale',u);else if(u.skills.includes('Soin mineur')&&u.id==='fil'){let target=S.party.find(p=>p.hp<p.maxHp);if(target){target.hp=Math.min(target.maxHp,target.hp+10);log('Filacii lance Soin mineur : '+target.name+' récupère 10 PV.');render();saveGame()}}else log('Aucun moyen de soin disponible.')}
+function restAll(){if(S.combat){log('Impossible de se reposer pendant un combat !');return}S.party.forEach(p=>p.hp=p.maxHp);log('L’équipe se repose. Tous les PV sont restaurés.');render();saveGame()}
+function renderTeam(){$('team').innerHTML='<div class="notice">Recrues futures : '+(S.recruited.archer?'Lina (Archère) recrutée':'Lina — Archère, rencontre plus tard')+' • '+(S.recruited.priest?'Oren (Prêtre) recruté':'Oren — Prêtre, rencontre plus tard')+'</div>'+S.party.map(p=>`<div class="card"><div class="row between"><b>${p.name} — ${p.class} niv. ${p.level}</b><span>${p.hp}/${p.maxHp} PV</span></div><div class="bar hp"><i style="width:${100*p.hp/p.maxHp}%"></i></div><div class="muted">EXP ${p.xp}/100</div><div class="stats">${Object.entries(p.stats).map(([k,v])=>`<div class="stat"><small>${k}</small><b>${v}</b></div>`).join('')}</div><details><summary>Voir les taux de croissance</summary><div class="stats">${Object.entries(p.growth).map(([k,v])=>`<div class="stat"><small>${k}</small><b>${v}%</b></div>`).join('')}</div></details><details><summary>Compétences</summary>${p.skills.join(' • ')}</details></div>`).join('')}
+function renderBag(){$('bag').innerHTML=S.party.map(p=>`<div class="card"><b>${p.name}</b>${[['Arme',p.weapon],['Armure',p.armor],['Accessoire',p.accessory]].map(([kind,n])=>`<details><summary>${kind} : ${n}</summary>${equipDetail(kind,n)}<div class="actionrow"><button onclick="equipMenu('${p.id}','${kind}')">Changer</button></div></details>`).join('')}</div>`).join('')+'<h3>Objets et soins</h3>'+Object.entries(S.items).map(([n,c])=>`<div class="row between card"><span>${n} × ${c}</span><button onclick="useItem('${n}')">Utiliser</button></div>`).join('')}
+function equipDetail(kind,n){let d=[...weapons,...armors,...accessories].find(x=>x.name===n);if(!d)return '<p class="muted">Aucune fiche disponible.</p>';return '<div class="stats">'+Object.entries(d).filter(([k,v])=>!['name','kind','desc','price'].includes(k)).map(([k,v])=>`<div class="stat"><small>${k.toUpperCase()}</small><b>${v}</b></div>`).join('')+'</div><p class="muted">'+d.desc+'</p>'}
+function equipMenu(id,kind){let p=S.party.find(x=>x.id===id),arr=kind==='Arme'?weapons:kind==='Armure'?armors:accessories;let choices=arr.map((x,i)=>`${i+1}. ${x.name}`).join('\n');let n=prompt('Choisis un équipement :\n'+choices);let d=arr[Number(n)-1];if(d){p[kind==='Arme'?'weapon':kind==='Armure'?'armor':'accessory']=d.name;log(p.name+' équipe '+d.name+'.');renderTeam();renderBag();saveGame()}}
+function renderShop(){$('shop').innerHTML='<div class="muted">Ton or : '+S.gold+' PO</div>'+shopItems.map((x,i)=>`<div class="card"><div class="row between"><div><b>${x.name}</b><div class="muted">${x.desc||'Équipement d’aventure.'}</div></div><button onclick="buy(${i})" ${S.gold<x.price?'disabled':''}>${x.price} PO</button></div></div>`).join('')}
+function buy(i){let x=shopItems[i];if(S.gold<x.price)return;S.gold-=x.price;if(x.kind==='Arme'||x.def!==undefined||x.bonus)S.items[x.name]=(S.items[x.name]||0)+1;else S.items[x.name]=(S.items[x.name]||0)+1;log('Achat : '+x.name+'.');render();saveGame()}
+function renderBestiary(){$('bestiary').innerHTML=Object.entries(monsters).map(([id,m])=>`<details><summary>${m.emoji} ${m.name} — ${m.maxHp} PV</summary><div class="stats">${Object.entries(m.stats).map(([k,v])=>`<div class="stat"><small>${k}</small><b>${v}</b></div>`).join('')}</div><p class="muted">Faiblesse : ${m.weak} • Résistance : ${m.resist}<br>Compétences : ${m.skills.join(', ')}<br>Récompenses : ${m.xp} EXP, ${m.gold} PO, ${m.drop}</p></details>`).join('')}
+function renderStory(){let choices=[];
+ if(S.stage===0){choices=[['Toucher le flocon avec le pendentif',()=>{S.symbols.push('flocon');log('Le pendentif active le symbole du flocon.');S.stage=1;startStage()}],['Examiner le symbole de lame',()=>{S.symbols.push('lame');log('Une lame gravée s’illumine faiblement.');S.items['Potion de soin']=(S.items['Potion de soin']||0)+1;log('Tu trouves une potion dans une niche.');S.stage=1;startStage()}],['Approcher la rune brisée',()=>{S.symbols.push('rune');log('La rune pulse et libère un souffle glacé.');S.stage=1;startStage()}]]}
+ else if(S.stage===1)choices=[['Explorer la galerie (combat)',()=>beginBattle('wolf',[6,3])],['Visiter la boutique',()=>openShop()],['Poursuivre vers l’autel',()=>{S.stage=2;startStage()}]];
+ else if(S.stage===2)choices=[['Défier la sentinelle',()=>beginBattle('sentry',[7,3])],['Visiter la boutique',()=>openShop()],['Poursuivre vers les runes',()=>{S.stage=3;startStage()}]];
+ else if(S.stage===3)choices=[['Affronter le spectre',()=>beginBattle('specter',[6,2])],['Visiter la boutique',()=>openShop()],['Traverser vers la forêt',()=>{S.stage=4;startStage()}]];
+ else if(S.stage===4)choices=[['Affronter l’araignée',()=>beginBattle('spider',[7,3])],['Se reposer',restAll],['Rejoindre la clairière',()=>{S.stage=5;startStage()}]];
+ else if(S.stage===5)choices=[['Affronter le Veilleur de brume',()=>beginBattle('boss',[7,2])],['Visiter la boutique',()=>openShop()],['Se reposer',restAll]];
+ else if(S.stage===6)choices=[['Fouiller la place du village',()=>{S.clues=(S.clues||0)+1;S.items['Potion de soin']=(S.items['Potion de soin']||0)+1;log('Dans une fontaine gelée, Filacii découvre un médaillon gravé du même symbole que le pendentif. Une potion était cachée dessous.');S.objective='Le médaillon porte une inscription : « Là où sonne la cloche, la mémoire attend. »';render();saveGame()}],['Repousser les pilleurs',()=>beginBattle('bandit',[7,3])],['Entrer dans la chapelle',()=>{S.stage=7;startStage()}]];
+ else if(S.stage===7)choices=[['Examiner les fresques',()=>{S.clues=(S.clues||0)+1;log('Elya reconnaît sur la fresque une silhouette tenant une couronne noire. À ses pieds, quatre personnes semblent privées de leur ombre.');S.objective='La fresque représente le Porte-Voix, un être qui vole les souvenirs pour ouvrir une porte.';render();saveGame()}],['Réveiller le Gardien des cloches',()=>beginBattle('warden',[7,2])],['Descendre dans la crypte',()=>{S.stage=8;startStage()}]];
+ else if(S.stage===8)choices=[['Confronter le Porte-Voix',()=>beginBattle('shadeboss',[7,2])],['Se préparer et se reposer',restAll],['Relire les indices',()=>{log('Le médaillon et la fresque désignent la même entité : le Porte-Voix. La cloche est sa prison… ou sa porte.');S.objective='Le Porte-Voix vous attend sous la chapelle.';render()}]];
+ else choices=[['Lire le dernier message',()=>{log('« Le premier sceau est tombé. Trois autres voix murmurent au-delà des montagnes. »');S.objective='Fin du chapitre II — La cloche sans écho. La suite attend dans les terres cendrées.';render()}],['Se reposer',restAll]];
+ $('storyChoices').innerHTML=choices.map((c,i)=>`<button onclick="storyChoice(${i})">${c[0]}</button>`).join('');window._choices=choices;
+}
+function storyChoice(i){window._choices[i][1]();render();saveGame()}
+function startStage(){let data={1:['Galerie de glace','Des traces de griffes traversent la neige. Une silhouette rôde au bout du couloir.'],2:['Autel des armes','Un autel ancien conserve des armes et armures oubliées.'],3:['Salle des runes','Une rune pulse au fond de la salle, gardée par une présence spectrale.'],4:['Forêt des pins','La neige étouffe les bruits. Quelque chose se déplace entre les arbres.'],5:['Clairière brumeuse','La brume se rassemble autour du Veilleur. Derrière lui, une route descend vers la vallée.'],6:['Village de Valbrume','Les maisons sont intactes, mais toutes les portes sont ouvertes. Aucun habitant ne répond. Une cloche tinte au loin, alors que le clocher est brisé.'],7:['Chapelle des absents','Des bancs renversés couvrent le sol. Sur les murs, des fresques ont été grattées avec soin.'],8:['Crypte des murmures','Sous la chapelle, des dizaines de voix répètent le même prénom : le tien.'],9:['La cloche sans écho','Le silence retombe. Dans les décombres, un fragment de mémoire pulse entre tes doigts.']}[S.stage];if(data){$('sceneTitle').textContent=data[0];$('sceneText').textContent=data[1]}S.objective=S.stage===6?'Trouve pourquoi le village est désert.':S.stage===7?'Cherche des indices dans la chapelle.':S.stage===8?'Affronte le Porte-Voix et découvre ce qu’il cherche.':S.stage===9?'Le chapitre II est terminé.': 'Explore la zone et choisis ta prochaine action.';renderStory();render();saveGame()}
+function openShop(){document.querySelector('[data-tab="shop"]').click();S.visitedShop=true;log('Tu consultes l’échoppe itinérante.')}
+function render(){ $('gold').textContent=S.gold+' PO';$('objective').textContent=S.objective;renderMap();renderLog();renderStory();renderTeam();renderBag();renderShop();renderBestiary()}
+function resetGame(){if(confirm('Recommencer WHITE FACE’S ? La sauvegarde locale sera remplacée.')){localStorage.removeItem('whitefaces_v5');S=structuredClone(base);enemies=[];startStage();render();saveGame()}}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');['map','team','bag','shop','bestiary'].forEach(t=>$(t+'Panel').classList.toggle('hidden',t!==b.dataset.tab));}));
+if(S.stage>0)startStage();else renderStory();render();saveGame();
+</script></body></html>
